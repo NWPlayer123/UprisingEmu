@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread -O2")
 
 set(SOURCES
 		src/core/hardware/DSP.cpp
+		src/core/interpreter/debug.cpp
 		src/core/interpreter/interpreter.cpp
 		src/core/gekko.cpp
 		src/core/memory.cpp
@@ -15,6 +16,7 @@ set(SOURCES
 
 set(HEADERS
 		src/core/hardware/DSP.h
+		src/core/interpreter/debug.h
 		src/core/interpreter/interpreter.h
 		src/core/gekko.h
 		src/core/memory.h

@@ -17,7 +17,7 @@ union GekkoInstruction {
 		u32 : 21;
 	};
     struct {
-		s32 SIMM : 16;
+		u32 SIMM : 16;
 		u32 rA : 5;
 		u32 rD : 5;
         u32 : 6;
@@ -37,6 +37,10 @@ union GekkoInstruction {
 	//unsigned immediate
 	struct {
 		u32 UIMM : 16;
+	};
+	struct {
+		u32 : 16;
+		u32 SR : 4; //segment register X
 	};
 };
 
@@ -107,3 +111,25 @@ typedef union HID0 {
 		u32 EMCP : 1; //enable MCP
 	};
 } HID0;
+
+typedef union UpperBAT {
+	u32 hex = 0;
+	struct {
+		u32 Vp : 1; //bit 31, User mode valid
+		u32 Vs : 1; //bit 30, Supervisor mode valid
+		u32 BL : 11; //bit 19-29, block length
+		u32 : 4;
+		u32 BEPI : 15;
+	};
+} UpperBAT;
+
+typedef union LowerBAT {
+	u32 hex = 0;
+	struct {
+		u32 PP : 2; //bit 30-31, protection bits
+		u32 : 1; //bit 29
+		u32 WIMG : 4; //bit 25-28, write-through, caching-inhibited, memory coherence guarded
+		u32 : 10;
+		u32 BRPN : 15;
+	};
+} LowerBAT;
