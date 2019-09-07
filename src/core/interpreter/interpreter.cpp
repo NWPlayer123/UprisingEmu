@@ -16,57 +16,74 @@ namespace interpreter {
 		}
 	}
 
-	void run(munna::file& f) {
+	void run(std::vector<GekkoInstruction>& code) {
 		GekkoInstruction inst;
 		for (int i = 0; i < 0x100; i++) {
-			printf("%08X ", 0xFFF0100 + (i * 4));
-			inst.hex = f.read32();
-			//printf("%08X\n", inst.hex);
-			//dodebug();
+			printf("%08X ", 0xFFF00100 + (i * 4));
+			inst = code[cpu.pc];
 			switch (inst.opcode) { //base opcode
-			case 14:
-				addi(inst);
-				break;
-			case 15:
-				addis(inst);
-				break;
-			case 19:
-				switch (inst.idx2) {
-					case 150: //isync, not implementing
-						break;
-					default:
-						throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
-				break;
-			case 24:
-				ori(inst);
-				break;
-			case 31:
-				switch (inst.idx2) {
-					case 146:
-						mtmsr(inst);
-						break;
-					case 210:
-						mtsr(inst);
-						break;
-					case 339:
-						mfspr(inst);
-						break;
-					case 467:
-						mtspr(inst);
-						//debug(inst, cpu);
-						break;
-					default:
-						throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
-				break;
-			case 44:
-				sth(inst);
-				break;
-			default:
-				throw format("unknown opcode %d\n", inst.opcode);
+				case 14:
+					addi(inst);
+					break;
+				case 15:
+					addis(inst);
+					break;
+				case 19:
+					switch (inst.idx2) {
+						case 150: //isync, not implementing
+							break;
+						default:
+							throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
+					}
+					break;
+				case 21:
+					rlwinm(inst);
+					break;
+				case 24:
+					ori(inst);
+					break;
+				case 31:
+					switch (inst.idx2) {
+						case 83:
+							mfmsr(inst);
+							break;
+						case 146:
+							mtmsr(inst);
+							break;
+						case 210:
+							mtsr(inst);
+							break;
+						case 339:
+							mfspr(inst);
+							break;
+						case 371:
+							mftb(inst);
+							break;
+						case 467:
+							mtspr(inst);
+							//debug(inst, cpu);
+							break;
+						default:
+							throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
+					}
+					break;
+				case 32:
+					lwz(inst);
+					break;
+				case 36:
+					stw(inst);
+					break;
+				case 44:
+					sth(inst);
+					break;
+				default:
+					throw format("unknown opcode %d\n", inst.opcode);
 			}
 			debug(inst, cpu);
+			cpu.pc++;
+			cpu.count++;
+			if (inst.opcode == 31)
+				dodebug();
 		}
 	}
 	void addi(GekkoInstruction& inst) { //opcode 14
@@ -83,8 +100,18 @@ namespace interpreter {
 			rGPR[inst.rD] = rGPR[inst.rA] + (inst.SIMM << 16);
 	}
 
+	void rlwinm(GekkoInstruction& inst) { //opcode 21
+		rGPR[inst.rA] = (ROTL(inst.rS, inst.SH) & MASK(inst.MB, inst.ME));
+		if (inst.Rc)
+			throw ("CR0 not implemented yet");
+	}
+
 	void ori(GekkoInstruction& inst) { //opcode 24
 		rGPR[inst.rA] = rGPR[inst.rS] | inst.UIMM;
+	}
+
+	void mfmsr(GekkoInstruction& inst) { //opcode 31 idx2 83
+		rGPR[inst.rS] = cpu.msr.hex;
 	}
 
 	void mtmsr(GekkoInstruction& inst) { //opcode 31 idx2 146
@@ -113,6 +140,10 @@ namespace interpreter {
 			default:
 				throw format("Unknown spr %d", spr);
 		}
+	}
+
+	void mftb(GekkoInstruction& inst) { //opcode 31 idx2 371
+		rGPR[inst.rD] = (u32)cpu.count;
 	}
 
 	void mtspr(GekkoInstruction& inst) { //opcode 31 idx2 467
@@ -148,6 +179,29 @@ namespace interpreter {
 				throw format("Unknown spr %d", spr);
 		}
 	}
+	void lwz(GekkoInstruction& inst) { //opcode 32
+		u32 address = (inst.rA ? rGPR[inst.rA] : 0) + EXTS(inst.d);
+		//printf("%08X\n", address);
+		std::byte* mem = cpu.memory[address >> 12];
+		if (mem > (std::byte*)1)
+			throw "lwz not impl yet";// *(u16*)mem[address & 0xFFF] = (u16)rGPR[inst.rS];
+		else if (mem == (std::byte*)1)
+			cpu.read32(address, rGPR[inst.rD]);
+		else
+			throw format("Invalid address: %08X", address);
+	}
+
+	void stw(GekkoInstruction& inst) { //opcode 36
+		u32 address = (inst.rA ? rGPR[inst.rA] : 0) + EXTS(inst.d);
+		//printf("%08X\n", address);
+		std::byte* mem = cpu.memory[address >> 12];
+		if (mem > (std::byte*)1)
+			throw "stw not impl yet";// *(u16*)mem[address & 0xFFF] = (u16)rGPR[inst.rS];
+		else if (mem == (std::byte*)1)
+			cpu.write32(address, rGPR[inst.rS]);
+		else
+			throw format("Invalid address: %08X", address);
+	}
 
 	void sth(GekkoInstruction& inst) { //opcode 44
 		u32 address = (inst.rA ? rGPR[inst.rA] : 0) + EXTS(inst.d);
@@ -156,7 +210,7 @@ namespace interpreter {
 		if (mem > (std::byte*)1)
 			throw "sth not impl yet";// *(u16*)mem[address & 0xFFF] = (u16)rGPR[inst.rS];
 		else if (mem == (std::byte*)1)
-			cpu.write16(address);
+			cpu.write16(address, (u16)rGPR[inst.rS]);
 		else
 			throw format("Invalid address: %08X", address);
 	}

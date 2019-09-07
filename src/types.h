@@ -15,6 +15,9 @@ typedef int8_t s8;
 typedef int16_t s16;
 typedef int32_t s32;
 typedef int64_t s64;
+extern u16 __builtin_bswap16(u16);
+extern u32 __builtin_bswap32(u32);
+extern u64 __builtin_bswap64(u64);
 
 // https://stackoverflow.com/a/26221725
 template<typename ... Args>

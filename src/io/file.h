@@ -44,6 +44,10 @@ namespace munna {
     class file {
         public:
             file(std::string filename, std::string mode="rb", int endian=1);
+			u64 tell(void);
+			u64 size(void);
+			void seek(u64 pos);
+			void seek(s64 off, int pos);
 			u8 readbyte(void);
 			u16 read16(void);
 			u32 read32(void);
@@ -52,8 +56,10 @@ namespace munna {
 			//"UINT64_MAX" for error checking
 			u64 temp = UINT64_MAX;
 			u64 filesize = UINT64_MAX;
-		private:
+			bool do_swap;
+			//TODO: private
 			std::fstream handle; //internal file handle
+		private:
 			std::unique_ptr<parse_base> parse; //subclass for reading data
     };
 }

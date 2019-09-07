@@ -45,8 +45,18 @@ namespace interpreter {
 		sprintf(buffer, "r%d, r%d, 0x%X", reg1, reg2, val);
 		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
 	}
-	void instruction_store(std::string name, u32 reg1, u32 val, u32 reg2, std::string pseudo) {
+
+
+
+
+
+	void instruction_offset(std::string name, u32 reg1, u32 val, u32 reg2, std::string pseudo) {
 		sprintf(buffer, "r%d, 0x%X(r%d)", reg1, val, reg2);
+		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
+	}
+
+	void instruction_rlwinm(std::string name, u32 rA, u32 rS, u32 SH, u32 MB, u32 ME, std::string pseudo) {
+		sprintf(buffer, "r%d, r%d, %d, %d, %d", rA, rS, SH, MB, ME);
 		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
 	}
 
@@ -68,11 +78,17 @@ namespace interpreter {
 						throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
 				}
 				break;
+			case 21:
+				rlwinmD(inst);
+				break;
 			case 24:
 				oriD(inst);
 				break;
 			case 31:
 				switch (inst.idx2) {
+					case 83:
+						mfmsrD(inst);
+						break;
 					case 146:
 						mtmsrD(inst);
 						break;
@@ -82,46 +98,57 @@ namespace interpreter {
 					case 339:
 						mfsprD(inst);
 						break;
+					case 371:
+						mftbD(inst);
+						break;
 					case 467:
 						mtsprD(inst, cpu);
 						break;
 					default:
-						throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
+						throw format("unknown debug opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
 				}
 				break;
-			/*
-			case 19:
-				switch (inst.idx2) {
-				case 150: //isync, not implementing
-					if (InterpreterDebugPrint)
-						printf("isync\n");
-					break;
-				default:
-					throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
-			case 24:
-				ori(inst);
+			case 32:
+				lwzD(inst);
 				break;
-			case 31:
-				switch (inst.idx2) {
-				case 146:
-					mtmsr(inst);
-					break;
-				case 339:
-					mfspr(inst);
-					break;
-				case 467:
-					mtspr(inst);
-					break;
-				default:
-					throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
+			case 33:
+				lwzuD(inst);
 				break;
-			case 44:
-				sth(inst);
-				break;*/
+			case 34:
+				lbzD(inst);
+				break;
+			case 35:
+				lbzuD(inst);
+				break;
+			case 36:
+				stwD(inst);
+				break;
+			case 37:
+				stwuD(inst);
+				break;
+			case 38:
+				stbD(inst);
+				break;
+			case 39:
+				stbuD(inst);
+				break;
+			case 40:
+				lhzD(inst);
+				break;
+			case 41:
+				lhzuD(inst);
+				break;
+			case 42:
+				lhaD(inst);
+				break;
+			case 43:
+				lhauD(inst);
+				break;
 			case 44:
 				sthD(inst);
+				break;
+			case 45:
+				sthuD(inst);
 				break;
 			default:
 				throw format("unknown debug opcode %d\n", inst.opcode);
@@ -148,6 +175,13 @@ namespace interpreter {
 				instruction3("addis", inst.rD, inst.rA, inst.SIMM, format("r%d = (r%d) + 0x%X", inst.rD, inst.rA, inst.SIMM << 16));
 	}
 
+	void rlwinmD(GekkoInstruction& inst) { //opcode 21
+		if (inst.Rc)
+			instruction_rlwinm("rlwinm.", inst.rA, inst.rS, inst.SH, inst.MB, inst.ME, format("r%d = ROTL(r%d, %d) & 0x%X", inst.rA, inst.rS, inst.SH, MASK(inst.MB, inst.ME)));
+		else
+			instruction_rlwinm("rlwinm", inst.rA, inst.rS, inst.SH, inst.MB, inst.ME, format("r%d = ROTL(r%d, %d) & 0x%X", inst.rA, inst.rS, inst.SH, MASK(inst.MB, inst.ME)));
+	}
+
 	void oriD(GekkoInstruction& inst) { //opcode 24
 		if (inst.rA == 0 && inst.rS == 0 && inst.UIMM == 0)
 			printf("nop\n");
@@ -156,6 +190,11 @@ namespace interpreter {
 				instruction3("ori", inst.rA, inst.rS, inst.UIMM, format("r%d |= 0x%X", inst.rA, inst.UIMM));
 			else
 				instruction3("ori", inst.rA, inst.rS, inst.UIMM, format("r%d = (r%d) | 0x%X", inst.rA, inst.rS, inst.UIMM));
+	}
+
+	//TODO: audit the 4 below
+	void mfmsrD(GekkoInstruction& inst) {
+		instruction1("mfspr", inst.rD, format("r%d = (%s)", inst.rS, "msr"));
 	}
 
 	void mtmsrD(GekkoInstruction& inst) { //opcode 31 idx2 146
@@ -173,6 +212,10 @@ namespace interpreter {
 			instruction_move2("mfspr", search->second.c_str(), inst.rS, format("r%d = (%s)", inst.rS, search->second.c_str()));
 		else
 			throw format("Unknown spr %d", spr);
+	}
+
+	void mftbD(GekkoInstruction& inst) {  //opcode 31 idx2 371
+		instruction1("mftb", inst.rD, format("r%d = (%s)", inst.rS, "tb"));
 	}
 
 	void mtsprD(GekkoInstruction& inst, gekko::GekkoCPU& cpu) { //opcode 31 idx2 467
@@ -255,14 +298,80 @@ namespace interpreter {
 		}
 	}
 
+	// rD = MEM(rA + EXTS(d), 4) -> load word
+	void lwzD(GekkoInstruction& inst) { //opcode 32
+		instruction_offset("lwz", inst.rD, inst.d, inst.rA, format("r%d = (u32)(r%d + 0x%X)", inst.rD, inst.rA, inst.d));
+	}
+
+	/* rD = MEM(rA + EXTS(d), 4) -> load word
+	 * rA += EXTS(d) -> update address */
+	void lwzuD(GekkoInstruction& inst) { //opcode 33
+		instruction_offset("lwzu", inst.rD, inst.d, inst.rA, format("r%d = (u32)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
+	}
+
+	// rD = MEM(rA + EXTS(d), 1) -> load byte
+	void lbzD(GekkoInstruction& inst) { //opcode 34
+		instruction_offset("lbz", inst.rD, inst.d, inst.rA, format("r%d = (u8)(r%d + 0x%X)", inst.rD, inst.rA, inst.d));
+	}
+
+	/* rD = MEM(rA + EXTS(d), 1) -> load byte
+	 * rA += EXTS(d) -> update address */
+	void lbzuD(GekkoInstruction& inst) { //opcode 35
+		instruction_offset("lbzu", inst.rD, inst.d, inst.rA, format("r%d = (u8)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
+	}
+
+	// MEM(rA + EXTS(d), 4) = rS -> store word
+	void stwD(GekkoInstruction& inst) { //opcode 36
+		instruction_offset("stw", inst.rS, inst.d, inst.rA, format("(u32)(r%d + 0x%X) = (r%d)", inst.rA, inst.d, inst.rS));
+	}
+
+	/* MEM(rA + EXTS(d), 4) = rS -> store word
+	 * rA += EXTS(d) -> update address */
+	void stwuD(GekkoInstruction& inst) { //opcode 37
+		instruction_offset("stwu", inst.rS, inst.d, inst.rA, format("(u32)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
+	}
+
+	// MEM(rA + EXTS(d), 1) = rS -> store byte
+	void stbD(GekkoInstruction& inst) { //opcode 38
+		instruction_offset("stb", inst.rS, inst.d, inst.rA, format("(u8)(r%d + 0x%X) = (r%d)", inst.rA, inst.d, inst.rS));
+	}
+
+	/* MEM(rA + EXTS(d), 1) = rS -> store byte
+	 * rA += EXTS(d) -> update address */
+	void stbuD(GekkoInstruction& inst) { //opcode 39
+		instruction_offset("stbu", inst.rS, inst.d, inst.rA, format("(u8)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
+	}
+
+	// rD = MEM(rA + EXTS(d), 2) -> load half
+	void lhzD(GekkoInstruction& inst) { //opcode 40
+		instruction_offset("lhz", inst.rD, inst.d, inst.rA, format("r%d = (u16)(r%d + 0x%X)", inst.rD, inst.rA, inst.d));
+	}
+
+	/* rD = MEM(rA + EXTS(d), 2) -> load half
+	 * rA += EXTS(d) -> update address */
+	void lhzuD(GekkoInstruction& inst) { //opcode 41
+		instruction_offset("lhzu", inst.rD, inst.d, inst.rA, format("r%d = (u16)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
+	}
+
+	// rD = EXTS(MEM(rA + EXTS(d), 2)) -> load signed half
+	void lhaD(GekkoInstruction& inst) { //opcode 42
+		instruction_offset("lha", inst.rD, inst.d, inst.rA, format("r%d = (s16)(r%d + 0x%X)", inst.rD, inst.rA, inst.d));
+	}
+
+	/* rD = EXTS(MEM(rA + EXTS(d), 2)) -> load signed half
+	 * rA += EXTS(d) -> update address */
+	void lhauD(GekkoInstruction& inst) { //opcode 43
+		instruction_offset("lhau", inst.rD, inst.d, inst.rA, format("r%d = (s16)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
+	}
+
+	// MEM(rA + EXTS(d), 2) = rS -> store half
 	void sthD(GekkoInstruction& inst) { //opcode 44
-		instruction_store("sth", inst.rS, inst.d, inst.rA, format("(r%d + 0x%X) = (r%d)", inst.rA, inst.d, inst.rS));
-		/*
-		if rA = 0
-			then b ← 0
-		else b ←(rA)
-			EA ← b + EXTS(d)
-			MEM(EA, 2) ← rS[16 - 31]
-		*/
+		instruction_offset("sth", inst.rS, inst.d, inst.rA, format("(u16)(r%d + 0x%X) = (r%d)", inst.rA, inst.d, inst.rS));
+	}
+
+	/* MEM(rA + EXTS(d), 2) = rS -> store half
+	 * rA += EXTS(d) -> update address */
+	void sthuD(GekkoInstruction& inst) { //opcode 45
+		instruction_offset("sthu", inst.rS, inst.d, inst.rA, format("(u16)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
 	}
 }

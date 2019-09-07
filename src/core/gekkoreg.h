@@ -34,17 +34,22 @@ union GekkoInstruction {
 	struct {
 		u32 d : 16;
 	};
-	//unsigned immediate
 	struct {
 		u32 UIMM : 16;
 	};
-	struct {
+	struct { //segment registers
 		u32 : 16;
-		u32 SR : 4; //segment register X
+		u32 SR : 4;
+	};
+	struct { //rlwinm
+		u32 Rc : 1;
+		u32 ME : 5;
+		u32 MB : 5;
+		u32 SH : 5;
 	};
 };
 
-#define VALID_MSR_MASK 0x2000
+#define VALID_MSR_MASK 0x2030
 //full function bits are saved in SRR1 when exception occurs
 typedef union MSR {
 	u32 hex;
