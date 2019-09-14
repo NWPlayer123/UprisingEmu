@@ -7,14 +7,14 @@ namespace memory {
 		return array; //return by value
 	}
 
-	std::vector<GekkoInstruction> alloc_code(size_t size) {
-		std::vector<GekkoInstruction> array; //create vector
+	std::vector<gekko::instruction> alloc_code(size_t size) {
+		std::vector<gekko::instruction> array; //create vector
 		array.reserve(size); //"reserve"/allocate X instructions
 		return array; //return by value
 	}
 
-	std::vector<GekkoInstruction> alloc_code(munna::file& f) {
-		std::vector<GekkoInstruction> array; //create vector
+	std::vector<gekko::instruction> alloc_code(munna::file& f) {
+		std::vector<gekko::instruction> array; //create vector
 		if (f.filesize == UINT64_MAX) f.size();
 		array.reserve(f.filesize >> 2); //divide to get 4-byte instructions
 		f.handle.read((char*)&array[0], f.filesize >> 2);

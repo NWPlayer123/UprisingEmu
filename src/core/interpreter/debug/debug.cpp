@@ -1,161 +1,14 @@
 ﻿#include "debug.h"
 
-namespace interpreter {
-
-	std::map<int, std::string> sprWhitelist = {
-		//instruction block address translation upper/lower
-		{528, "ibat0u"},
-		{529, "ibat0l"},
-		{530, "ibat1u"},
-		{531, "ibat1l"},
-		{532, "ibat2u"},
-		{533, "ibat2l"},
-		{534, "ibat3u"},
-		{535, "ibat3l"},
-		//data block address translation upper/lower
-		{536, "dbat0u"},
-		{537, "dbat0l"},
-		{538, "dbat1u"},
-		{539, "dbat1l"},
-		{540, "dbat2u"},
-		{541, "dbat2l"},
-		{542, "dbat3u"},
-		{543, "dbat3l"},
-		//Hardware Implementation-Dependent
-		{1008, "hid0"},
-	};
-	char buffer[256];
-	void instruction_move(std::string name, std::string spr, u32 reg, std::string pseudo) {
-		sprintf(buffer, "%s, r%d", spr.c_str(), reg);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-	void instruction_move2(std::string name, std::string spr, u32 reg, std::string pseudo) {
-		sprintf(buffer, "r%d, %s", reg, spr.c_str());
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-	void instruction1(std::string name, u32 reg, std::string pseudo) {
-		sprintf(buffer, "r%d", reg);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-	void instruction2(std::string name, u32 r1, u32 val, std::string pseudo) {
-		sprintf(buffer, "r%d, 0x%X", r1, val);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-	void instruction3(std::string name, u32 reg1, u32 reg2, u32 val, std::string pseudo) {
-		sprintf(buffer, "r%d, r%d, 0x%X", reg1, reg2, val);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
+namespace debug {
+	void debug(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) {
+		if (primary[inst.opcode] != nullptr)
+			primary[inst.opcode](inst, cpu);
+		else
+			throw format("unknown debug opcode %d\n", inst.opcode);
 	}
 
-
-
-
-
-	void instruction_offset(std::string name, u32 reg1, u32 val, u32 reg2, std::string pseudo) {
-		sprintf(buffer, "r%d, 0x%X(r%d)", reg1, val, reg2);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-
-	void instruction_rlwinm(std::string name, u32 rA, u32 rS, u32 SH, u32 MB, u32 ME, std::string pseudo) {
-		sprintf(buffer, "r%d, r%d, %d, %d, %d", rA, rS, SH, MB, ME);
-		printf("%-12s%-20s# %s\n", name.c_str(), &buffer, pseudo.c_str());
-	}
-
-	//TODOs: interpret "SIMM" (signed) correctly
-	void debug(GekkoInstruction& inst, gekko::GekkoCPU& cpu) {
-		switch (inst.opcode) { //base opcode
-			case 14:
-				addiD(inst);
-				break;
-			case 15:
-				addisD(inst);
-				break;
-			case 19:
-				switch (inst.idx2) {
-					case 150: //isync, not implementing
-						printf("isync\n");
-						break;
-					default:
-						throw format("unknown opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
-				break;
-			case 21:
-				rlwinmD(inst);
-				break;
-			case 24:
-				oriD(inst);
-				break;
-			case 31:
-				switch (inst.idx2) {
-					case 83:
-						mfmsrD(inst);
-						break;
-					case 146:
-						mtmsrD(inst);
-						break;
-					case 210:
-						mtsrD(inst);
-						break;
-					case 339:
-						mfsprD(inst);
-						break;
-					case 371:
-						mftbD(inst);
-						break;
-					case 467:
-						mtsprD(inst, cpu);
-						break;
-					default:
-						throw format("unknown debug opcode %d idx2 %d %08X\n", inst.opcode, inst.idx2, inst.hex);
-				}
-				break;
-			case 32:
-				lwzD(inst);
-				break;
-			case 33:
-				lwzuD(inst);
-				break;
-			case 34:
-				lbzD(inst);
-				break;
-			case 35:
-				lbzuD(inst);
-				break;
-			case 36:
-				stwD(inst);
-				break;
-			case 37:
-				stwuD(inst);
-				break;
-			case 38:
-				stbD(inst);
-				break;
-			case 39:
-				stbuD(inst);
-				break;
-			case 40:
-				lhzD(inst);
-				break;
-			case 41:
-				lhzuD(inst);
-				break;
-			case 42:
-				lhaD(inst);
-				break;
-			case 43:
-				lhauD(inst);
-				break;
-			case 44:
-				sthD(inst);
-				break;
-			case 45:
-				sthuD(inst);
-				break;
-			default:
-				throw format("unknown debug opcode %d\n", inst.opcode);
-		}
-	}
-
-	void addiD(GekkoInstruction& inst) { //opcode 14
+	/*void addiD(GekkoInstruction& inst) { //opcode 14
 		if (inst.rA == 0)
 			instruction2("li", inst.rD, inst.SIMM, format("r%d = 0x%X", inst.rD, EXTS(inst.SIMM)));
 		else
@@ -190,6 +43,10 @@ namespace interpreter {
 				instruction3("ori", inst.rA, inst.rS, inst.UIMM, format("r%d |= 0x%X", inst.rA, inst.UIMM));
 			else
 				instruction3("ori", inst.rA, inst.rS, inst.UIMM, format("r%d = (r%d) | 0x%X", inst.rA, inst.rS, inst.UIMM));
+	}
+
+	void subfD(GekkoInstruction& inst) {
+		instruction_reg3("subf", inst.rD, inst.rA, inst.rB, format("r%d = (r%d) - (r%d)", inst.rD, inst.rB, inst.rA));
 	}
 
 	//TODO: audit the 4 below
@@ -304,7 +161,7 @@ namespace interpreter {
 	}
 
 	/* rD = MEM(rA + EXTS(d), 4) -> load word
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void lwzuD(GekkoInstruction& inst) { //opcode 33
 		instruction_offset("lwzu", inst.rD, inst.d, inst.rA, format("r%d = (u32)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
 	}
@@ -315,7 +172,7 @@ namespace interpreter {
 	}
 
 	/* rD = MEM(rA + EXTS(d), 1) -> load byte
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void lbzuD(GekkoInstruction& inst) { //opcode 35
 		instruction_offset("lbzu", inst.rD, inst.d, inst.rA, format("r%d = (u8)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
 	}
@@ -326,7 +183,7 @@ namespace interpreter {
 	}
 
 	/* MEM(rA + EXTS(d), 4) = rS -> store word
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void stwuD(GekkoInstruction& inst) { //opcode 37
 		instruction_offset("stwu", inst.rS, inst.d, inst.rA, format("(u32)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
 	}
@@ -337,7 +194,7 @@ namespace interpreter {
 	}
 
 	/* MEM(rA + EXTS(d), 1) = rS -> store byte
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void stbuD(GekkoInstruction& inst) { //opcode 39
 		instruction_offset("stbu", inst.rS, inst.d, inst.rA, format("(u8)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
 	}
@@ -348,7 +205,7 @@ namespace interpreter {
 	}
 
 	/* rD = MEM(rA + EXTS(d), 2) -> load half
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void lhzuD(GekkoInstruction& inst) { //opcode 41
 		instruction_offset("lhzu", inst.rD, inst.d, inst.rA, format("r%d = (u16)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
 	}
@@ -359,7 +216,7 @@ namespace interpreter {
 	}
 
 	/* rD = EXTS(MEM(rA + EXTS(d), 2)) -> load signed half
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void lhauD(GekkoInstruction& inst) { //opcode 43
 		instruction_offset("lhau", inst.rD, inst.d, inst.rA, format("r%d = (s16)(r%d + 0x%X); r%d += EA", inst.rD, inst.rA, inst.d, inst.rA));
 	}
@@ -370,8 +227,8 @@ namespace interpreter {
 	}
 
 	/* MEM(rA + EXTS(d), 2) = rS -> store half
-	 * rA += EXTS(d) -> update address */
+	 * rA += EXTS(d) -> update address *
 	void sthuD(GekkoInstruction& inst) { //opcode 45
 		instruction_offset("sthu", inst.rS, inst.d, inst.rA, format("(u16)(r%d + 0x%X) = (r%d); r%d += EA", inst.rA, inst.d, inst.rS, inst.rA));
-	}
+	}*/
 }

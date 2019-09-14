@@ -1,8 +1,14 @@
-﻿// UprisingEmu.h : Include file for standard system include files,
-// or project specific include files.
+﻿#pragma once
 
-#pragma once
+#include "core/interpreter/interpreter.h"
+#include "core/memory.h"
+#include "core/gekko.h"
+#include "io/file.h"
+#include "types.h"
 
-#include <iostream>
-
-// TODO: Reference additional headers your program requires here.
+/* Project TODOs here
+ * - eventual arch-specific JITs
+ *     - test uint_fast32_t ?
+ *
+ *
+ */

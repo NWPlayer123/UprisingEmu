@@ -6,6 +6,8 @@
 #include <vector>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <array>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -18,6 +20,14 @@ typedef int64_t s64;
 extern u16 __builtin_bswap16(u16);
 extern u32 __builtin_bswap32(u32);
 extern u64 __builtin_bswap64(u64);
+
+//if bit 16 is 1, extend it (16 -> 32)
+static inline constexpr s32 EXTS(u32 x) { return (x >> 15 ? x | 0xFFFF0000 : x); }
+
+//we have to carry bits so shift (32 - y) other direction and OR
+static inline constexpr u32 ROTL(u32 x, u32 y) { return ((x << y) | (x >> (32 - y))); }
+static inline constexpr u32 ROTR(u32 x, u32 y) { return ((x << (32 - y)) | (x >> y)); }
+static inline constexpr u32 MASK(u32 x, u32 y) { return ((x <= y) ? ((~0u >> x) & (~0u << (31 - y))) : ((~0u >> x) | (~0u << (31 - y)))); }
 
 // https://stackoverflow.com/a/26221725
 template<typename ... Args>
