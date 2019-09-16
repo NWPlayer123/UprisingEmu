@@ -16,6 +16,7 @@ namespace interpreter {
 		for (int i = 0; i < 0x100; i++) {
 			printf("%08X ", 0xFFF00100 + (i * 4));
 			inst = code[cpu->pc];
+			cpu->pc++; //update after reading, so we can update with branching
 			//printf("%08X\n", inst.hex);
 			if (primary[inst.opcode] != nullptr) {
 				primary[inst.opcode](inst, cpu);
@@ -24,7 +25,6 @@ namespace interpreter {
 			}
 			debug::debug(inst, cpu); //print instruction to terminal
 			//dodebug(cpu);
-			cpu->pc++;
 			cpu->count++;
 		}
 	}

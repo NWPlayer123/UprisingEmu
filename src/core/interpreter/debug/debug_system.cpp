@@ -25,6 +25,28 @@ namespace debug {
 		{1008, "hid0"},
 	};
 
+	// Memory Synchronization Instructions
+	void eieio(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 854
+
+	}
+
+	void isync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 19 ext 150
+		printf("isync\n");
+	}
+
+	void lwarx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 20
+
+	}
+
+	void stwcx_rc(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 150
+
+	}
+
+	void sync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 598
+
+	}
+
+
 	void mcrxr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 512
 
 	}
@@ -34,15 +56,19 @@ namespace debug {
 	}
 
 	void mfmsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 83
-
+		instruction1("mfmsr", inst.rD);
 	}
 
 	void mfspr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 339
-
+		auto search = whitelist.find(inst.spr());
+		if (search != whitelist.end())
+			instruction_move2("mfspr", search->second.c_str(), inst.rS);
+		else
+			throw format("Unknown spr %d", inst.spr());
 	}
 
 	void mftb(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 371
-
+		instruction1(inst.spr() == 268 ? "mftb" : "mftbu", inst.rD);
 	}
 
 	void mtcrf(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 144
@@ -59,5 +85,21 @@ namespace debug {
 			instruction_move("mtspr", search->second.c_str(), inst.rS);
 		else
 			throw format("Unknown spr %d", inst.spr());
+	}
+
+	//Segment Register Manipulation Instructions
+	void mfsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 595
+	}
+
+	void mfsrin(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 659
+
+	}
+
+	void mtsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 210
+		instruction_move("mtsr", format("sr%d", inst.SR), inst.rS);
+	}
+
+	void mtsrin(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 242
+
 	}
 }

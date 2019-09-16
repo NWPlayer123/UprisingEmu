@@ -11,17 +11,88 @@
 namespace interpreter {
 	#define	rGPR cpu->gpr
 
+	void opcode19(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);
 	void opcode31(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);
 
 	static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 64> primary = {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 0-7
-		nullptr, nullptr, nullptr, nullptr, addicx,  addicx,  addi,   addis,    //opcode 8-15
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 16-23
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, opcode31,//opcode 24-31
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 32-39
-		nullptr, nullptr, nullptr, nullptr, sth,     nullptr, nullptr, nullptr, //opcode 40-47
+		nullptr, nullptr, cmpli,   nullptr, addic,   addic_rc,addi,   addis,    //opcode 8-15
+		nullptr, nullptr, nullptr, opcode19,nullptr, rlwinmx, nullptr, nullptr, //opcode 16-23
+		ori,     oris,    nullptr, nullptr, nullptr, nullptr, nullptr, opcode31,//opcode 24-31
+		lwz,     lwzu,    lbz,     lbzu,    stw,     stwu,    stb,     stbu,    //opcode 32-39
+		lhz,     lhzu,    lha,     lhau,    sth,     sthu,    nullptr, nullptr, //opcode 40-47
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 48-55
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr  //opcode 56-63
+	};
+
+	static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 536> table19 = {
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 0-7
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 8-15
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 16-23
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 24-31
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 32-39
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 40-47
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 48-55
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 56-63
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 64-71
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 72-79
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 80-87
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 88-95
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 96-103
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 104-111
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 112-119
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 120-127
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 128-135
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 136-143
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, isync,   nullptr, //opcode 144-151
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 152-159
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 160-167
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 168-175
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 176-183
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 184-191
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 192-199
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 200-207
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 208-215
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 216-223
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 224-231
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 232-239
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 240-247
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 248-255
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 256-263
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 264-271
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 272-279
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 280-287
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 288-295
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 296-303
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 304-311
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 312-319
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 320-327
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 328-335
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 336-343
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 344-351
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 352-359
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 360-367
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 368-375
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 376-383
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 384-391
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 392-399
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 400-407
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 408-415
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 416-423
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 424-431
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 432-439
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 440-447
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 448-455
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 456-463
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 464-471
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 472-479
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 480-487
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 488-495
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 496-503
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 504-511
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 512-519
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 520-527
+		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 528-535
 	};
 
 	static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 1024> table31 = {
@@ -30,12 +101,12 @@ namespace interpreter {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 16-23
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 24-31
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 32-39
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 40-47
+		subfx,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 40-47
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 48-55
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 56-63
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 64-71
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 72-79
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 80-87
+		nullptr, nullptr, nullptr, mfmsr,   nullptr, nullptr, nullptr, nullptr, //ext 80-87
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 88-95
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 96-103
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 104-111
@@ -51,7 +122,7 @@ namespace interpreter {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 184-191
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 192-199
 		nullptr, nullptr, addzex,  nullptr, nullptr, nullptr, nullptr, nullptr, //ext 200-207
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 208-215
+		nullptr, nullptr, mtsr,    nullptr, nullptr, nullptr, nullptr, nullptr, //ext 208-215
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 216-223
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 224-231
 		nullptr, nullptr, addmex,  nullptr, nullptr, nullptr, nullptr, nullptr, //ext 232-239
@@ -67,11 +138,11 @@ namespace interpreter {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 312-319
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 320-327
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 328-335
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 336-343
+		nullptr, nullptr, nullptr, mfspr,   nullptr, nullptr, nullptr, nullptr, //ext 336-343
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 344-351
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 352-359
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 360-367
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 368-375
+		nullptr, nullptr, nullptr, mftb,    nullptr, nullptr, nullptr, nullptr, //ext 368-375
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 376-383
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 384-391
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 392-399

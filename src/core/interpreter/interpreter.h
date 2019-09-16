@@ -14,7 +14,4 @@ namespace interpreter {
 	void run(std::vector<gekko::instruction>& code);
 	#define rGPR cpu->gpr
 	//#define rSPR cpu.spr
-
-	//static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 64> primary = { nullptr };
-	//static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 1024> table31 = { nullptr };
 }

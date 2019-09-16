@@ -51,19 +51,33 @@ namespace gekko {
 	union instruction {
 		u32 hex;
 		BITSTRUCT(0, 6, opcode);
+
+		BITSTRUCT(6, 3, crfD);
 		BITSTRUCT(6, 5, rD);
 		BITSTRUCT(6, 5, rS);
+
+		BITSTRUCT(10, 1, L);
+
 		BITSTRUCT(11, 5, rA);
+		BITSTRUCT(11, 5, spr2);
+
+		BITSTRUCT(12, 4, SR);
+
 		BITSTRUCT(16, 5, rB);
-		BITSTRUCT(21, 10, ext); //"extended" opcode
-		BITSTRUCT(21, 1, OE); //OE makes a different opcode w/extended
-		BITSTRUCT(31, 1, Rc); //"compare" bit
+		BITSTRUCT(16, 5, NB); //num_bytes for lswi/stswi
+		BITSTRUCT(16, 5, SH);
+		BITSTRUCT(16, 5, spr1);
+
 		BITSTRUCT(16, 16, SIMM); //interpret signed manually, convenience
 		BITSTRUCT(16, 16, UIMM);
 		BITSTRUCT(16, 16, d); //for load/store
-		BITSTRUCT(6, 3, crfD);
-		BITSTRUCT(11, 5, spr2);
-		BITSTRUCT(16, 5, spr1);
+
+		BITSTRUCT(21, 1, OE); //OE makes a different opcode w/extended
+		BITSTRUCT(21, 5, MB);
+		BITSTRUCT(21, 10, ext); //"extended" opcode
+
+		BITSTRUCT(26, 5, ME);
+		BITSTRUCT(31, 1, Rc); //"compare" bit
 		inline constexpr u32 spr(void) { return ((this->spr1 << 5) | this->spr2); }
 	};
 
@@ -148,8 +162,10 @@ namespace gekko {
 	typedef struct cpu {
 		cpu(void);
 		inline void hwreg(u32 address);
+		void write8(u32 address, u8 value);
 		void write16(u32 address, u16 value);
 		void write32(u32 address, u32 value);
+		void read8(u32 address, u32& reg);
 		void read16(u32 address, u32& reg);
 		void read32(u32 address, u32& reg);
 

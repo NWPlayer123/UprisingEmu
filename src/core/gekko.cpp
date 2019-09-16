@@ -16,6 +16,10 @@ namespace gekko {
 		this->memory[address >> 12] = (std::byte*)1;
 	}
 
+	void cpu::write8(u32 address, u8 value) {
+		//printf("\nwrite8\n");
+	}
+
 	void cpu::write16(u32 address, u16 value) {
 		//printf("\nwrite16\n");
 	}
@@ -24,12 +28,16 @@ namespace gekko {
 		//printf("\nwrite32\n");
 	}
 
+	void cpu::read8(u32 address, u32& reg) {
+		//printf("\nread8\n");
+	}
+
 	void cpu::read16(u32 address, u32& reg) {
-		//printf("\nwrite16\n");
+		//printf("\nread16\n");
 	}
 
 	void cpu::read32(u32 address, u32& reg) {
-		//printf("\nwrite32\n");
+		//printf("\nread32\n");
 	}
 
 	u32 cpu::loadaddr(u32 base_addr, s32 offset) {
