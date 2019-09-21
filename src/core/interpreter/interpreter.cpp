@@ -13,18 +13,21 @@ namespace interpreter {
 	void run(std::vector<gekko::instruction>& code) {
 		std::unique_ptr cpu = std::make_unique<gekko::cpu>();
 		gekko::instruction inst;
-		for (int i = 0; i < 0x100; i++) {
-			printf("%08X ", 0xFFF00100 + (i * 4));
-			inst = code[cpu->pc];
-			cpu->pc++; //update after reading, so we can update with branching
+		cpu->pc = 0xFFF00100; //set IPL entrypoint
+		cpu->base = 0xFFF00100; //temp, don't break my code[]
+		while (true) {
+			inst = code[(cpu->pc - cpu->base) / 4];
 			//printf("%08X\n", inst.hex);
 			if (primary[inst.opcode] != nullptr) {
 				primary[inst.opcode](inst, cpu);
 			} else {
 				throw format("unknown opcode %d\n", inst.opcode);
 			}
-			debug::debug(inst, cpu); //print instruction to terminal
-			//dodebug(cpu);
+			/*debug::debug(inst, cpu); //print instruction to terminal
+			if (inst.opcode == 10)
+				dodebug(cpu);*/
+			if (inst.opcode != 16 && inst.opcode != 18 && !(inst.opcode == 31 && inst.ext == 16) && !(inst.opcode == 31 && inst.ext == 528))
+				cpu->pc += 4; //TODO: find less garbage way? probably just duplicate pc++ for every non-branch instruction
 			cpu->count++;
 		}
 	}

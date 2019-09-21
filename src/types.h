@@ -1,13 +1,14 @@
 #pragma once
 
+#include <array>
+#include <bitset>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <vector>
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <array>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -20,6 +21,8 @@ typedef int64_t s64;
 extern u16 __builtin_bswap16(u16);
 extern u32 __builtin_bswap32(u32);
 extern u64 __builtin_bswap64(u64);
+
+#define BITSTRUCT(bit, len, name) struct { u32 : (32 - bit - len); u32 name : len; }
 
 //if bit 16 is 1, extend it (16 -> 32)
 static inline constexpr s32 EXTS(u32 x) { return (x >> 15 ? x | 0xFFFF0000 : x); }

@@ -4,12 +4,47 @@ namespace gekko {
 	cpu::cpu(void) {
 		this->xer.hex = 0;
 		this->msr.hex = 0;
-		hwreg(PI::REGISTER_BASE);
-		hwreg(PI::REGISTER_BASE | 0xC0000000);
-		hwreg(MI::REGISTER_BASE);
-		hwreg(MI::REGISTER_BASE | 0xC0000000);
-		hwreg(DSP::REGISTER_BASE);
-		hwreg(DSP::REGISTER_BASE | 0xC0000000);
+		//one page is too wide, so we need to map the whole range
+
+		// Command Processor (CP)
+		this->hwreg(0x0C000000);
+		// Pixel Engine (PE)
+		this->hwreg(0x0C001000);
+		// Video Interface (VI)
+		this->hwreg(0x0C002000);
+		// Processor Interface (PI)
+		this->hwreg(0x0C003000);
+		// Memory Interface (MI)
+		this->hwreg(0x0C004000);
+		// Audio Interface (AI)
+		this->hwreg(0x0C005000);
+		// DVD Interface (DI) 6000
+		// Serial Interface (SI) 6400
+		// External Interface (EXI) 6800
+		// Streaming Interface 6C00
+		this->hwreg(0x0C006000);
+		// GX FIFO
+		this->hwreg(0x0C008000);
+
+		// Command Processor (CP)
+		this->hwreg(0xCC000000);
+		// Pixel Engine (PE)
+		this->hwreg(0xCC001000);
+		// Video Interface (VI)
+		this->hwreg(0xCC002000);
+		// Processor Interface (PI)
+		this->hwreg(0xCC003000);
+		// Memory Interface (MI)
+		this->hwreg(0xCC004000);
+		// Audio Interface (AI)
+		this->hwreg(0xCC005000);
+		// DVD Interface (DI) 6000
+		// Serial Interface (SI) 6400
+		// External Interface (EXI) 6800
+		// Streaming Interface 6C00
+		this->hwreg(0xCC006000);
+		// GX FIFO
+		this->hwreg(0xCC008000);
 	}
 
 	void cpu::hwreg(u32 address) {
@@ -25,7 +60,13 @@ namespace gekko {
 	}
 
 	void cpu::write32(u32 address, u32 value) {
-		//printf("\nwrite32\n");
+		//printf("\nwrite32\n%08X %08X\n", address, value);
+		switch (address & 0xFFFFFF00) {
+			case 0x0C006800:
+			case 0xCC006800:
+				this->exi.write(address, value);
+				break;
+		}
 	}
 
 	void cpu::read8(u32 address, u32& reg) {
@@ -73,12 +114,16 @@ namespace gekko {
 			if (result == 0)
 				CR0 |= CR_EQ;
 			else //get MSB, which handles sign
-				CR0 |= result & 0x80000000 ? CR_LT : CR_GT;
-			this->CR[0] = CR0;
+				CR0 |= result & 0x8000 ? CR_LT : CR_GT;
+			this->CR.setreg(0, CR0);
 		}
 	}
 
-	u8& CR::operator[](u8 index) {
+	bool CR::getbit(u8 index) {
+		return (this->hex >> (31 - index)) & 1;
+	}
+
+	u8 CR::getreg(u8 index) {
 		switch (index) {
 			case 0: return this->CR0;
 			case 1: return this->CR1;
@@ -90,5 +135,23 @@ namespace gekko {
 			case 7: return this->CR7;
 			default: throw format("unknown CR index: %d", index);
 		}
+	}
+
+	void CR::setreg(u8 index, u8 value) {
+		switch (index) {
+			case 0: this->CR0 = value & 15; break;
+			case 1: this->CR1 = value & 15; break;
+			case 2: this->CR2 = value & 15; break;
+			case 3: this->CR3 = value & 15; break;
+			case 4: this->CR4 = value & 15; break;
+			case 5: this->CR5 = value & 15; break;
+			case 6: this->CR6 = value & 15; break;
+			case 7: this->CR7 = value & 15; break;
+			default: throw format("unknown CR index: %d", index);
+		}
+	}
+
+	void CR::write(u8 index, bool bit) {
+		this->hex = ((this->hex & ~(1 << index)) | (bit << index));
 	}
 }

@@ -1,10 +1,10 @@
 #pragma once
 #include "hardware/DSP.h"
-#include "hardware/MI.h"
-#include "hardware/PI.h"
+#include "hardware/ExternalInterface.h"
+#include "hardware/MemoryInterface.h"
+#include "hardware/ProcessorInterface.h"
+#include "hardware/SerialInterface.h"
 #include "../types.h"
-
-#define BITSTRUCT(bit, len, name) struct { u32 : (32 - bit - len); u32 name : len; }
 
 namespace gekko {
 	typedef union XER {
@@ -47,6 +47,11 @@ namespace gekko {
 		};
 	} MSR;
 
+	#define inst_BO_0 (inst.BO & (1 << 4)) //if set, ignore BO_TRUE
+	#define inst_BO_1 (inst.BO & (1 << 3)) //if set, check if condition is TRUE
+	#define inst_BO_2 (inst.BO & (1 << 2)) //if set, ignore CTR
+	#define inst_BO_3 (inst.BO & (1 << 1)) //if set, branch if CTR is 0 (else != 0)
+	#define inst_BO_4 (inst.BO & (1 << 0)) //branch predictor hint ("+")
 	//we can interpret all instructions under one structure
 	union instruction {
 		u32 hex;
@@ -55,10 +60,13 @@ namespace gekko {
 		BITSTRUCT(6, 3, crfD);
 		BITSTRUCT(6, 5, rD);
 		BITSTRUCT(6, 5, rS);
+		BITSTRUCT(6, 5, BO);
+		BITSTRUCT(6, 24, LI);
 
 		BITSTRUCT(10, 1, L);
 
 		BITSTRUCT(11, 5, rA);
+		BITSTRUCT(11, 5, BI);
 		BITSTRUCT(11, 5, spr2);
 
 		BITSTRUCT(12, 4, SR);
@@ -68,6 +76,8 @@ namespace gekko {
 		BITSTRUCT(16, 5, SH);
 		BITSTRUCT(16, 5, spr1);
 
+
+		BITSTRUCT(16, 14, BD);
 		BITSTRUCT(16, 16, SIMM); //interpret signed manually, convenience
 		BITSTRUCT(16, 16, UIMM);
 		BITSTRUCT(16, 16, d); //for load/store
@@ -77,7 +87,9 @@ namespace gekko {
 		BITSTRUCT(21, 10, ext); //"extended" opcode
 
 		BITSTRUCT(26, 5, ME);
-		BITSTRUCT(31, 1, Rc); //"compare" bit
+		BITSTRUCT(30, 1, AA); //Absolute Address
+		BITSTRUCT(31, 1, Rc); //"Record" bit
+		BITSTRUCT(31, 1, LK); //branch and *link*
 		inline constexpr u32 spr(void) { return ((this->spr1 << 5) | this->spr2); }
 	};
 
@@ -141,22 +153,25 @@ namespace gekko {
 	} LowerBAT;
 
 	#define CR_LT 1 << 3
-	#define CR_EQ 1 << 2
-	#define CR_GT 1 << 1
+	#define CR_GT 1 << 2
+	#define CR_EQ 1 << 1
 	#define CR_SO 1 << 0
 	typedef union CR {
-		u64 hex;
+		u32 hex;
 		struct {
-			u8 CR0;
-			u8 CR1;
-			u8 CR2;
-			u8 CR3;
-			u8 CR4;
-			u8 CR5;
-			u8 CR6;
-			u8 CR7;
+			u32 CR7 : 4;
+			u32 CR6 : 4;
+			u32 CR5 : 4;
+			u32 CR4 : 4;
+			u32 CR3 : 4;
+			u32 CR2 : 4;
+			u32 CR1 : 4;
+			u32 CR0 : 4;
 		};
-		u8& operator[](u8 index);
+		bool getbit(u8 index);
+		u8 getreg(u8 index);
+		void setreg(u8 index, u8 value);
+		void write(u8 index, bool bit);
 	} CR;
 
 	typedef struct cpu {
@@ -180,9 +195,12 @@ namespace gekko {
 		CR CR;
 
 		u64 count = 0;
-		u32 pc = 0;
+		u32 pc = 0; //Program Counter
+		u32 base = 0; //temp
+		u32 lr = 0; //Link Register
 		u32 gpr[32] = { 0 };
 		u32 spr[1024] = { 0 }; //need to gateway
+		u32 ctr;
 		MSR msr; //machine state register
 		std::byte* memory[0x100000] = { nullptr }; //0x100000000 (4GB) / 0x1000 (4KB)
 		u32 sr[16] = { 0 };
@@ -192,5 +210,9 @@ namespace gekko {
 		//temp variables
 		u32 EA;
 		std::byte* memaddr = nullptr;
+		u32 oldpc;
+
+		//hwreg
+		EXI::EXI exi;
 	} cpu;
 }

@@ -132,16 +132,20 @@ namespace interpreter {
 
 	void cmpli(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 10
 		u8 temp = cpu->xer.SO ? CR_SO : 0;
-		if (inst.UIMM == 0)
+		if (rGPR[inst.rA] < inst.UIMM)
+			temp |= CR_LT;
+		else if (rGPR[inst.rA] > inst.UIMM)
+			temp |= CR_GT;
+		else
 			temp |= CR_EQ;
-		else //get MSB, which handles sign
-			temp |= inst.UIMM & 0x80000000 ? CR_LT : CR_GT;
-		cpu->CR[inst.crfD] = temp;
+		cpu->CR.setreg(inst.crfD, temp);
 	}
 
 	// Integer Logical Instructions
 	void andx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 28
-
+		rGPR[inst.rA] = rGPR[inst.rS] & rGPR[inst.rB];
+		if (inst.Rc) //and.
+			cpu->update_info_regs(rGPR[inst.rS], rGPR[inst.rB], rGPR[inst.rA], true, false);
 	}
 
 	void andcx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 60

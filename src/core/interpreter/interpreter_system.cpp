@@ -23,7 +23,7 @@ namespace interpreter {
 	}
 
 	void mcrxr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 512
-		cpu->CR[inst.crfD] = cpu->xer.hex >> 28; //set crfD to top 4 bits of xer
+		cpu->CR.setreg(inst.crfD, cpu->xer.hex >> 28); //set crfD to top 4 bits of xer
 		cpu->xer.hex &= 0x0FFFFFFF; //clear xer
 	}
 

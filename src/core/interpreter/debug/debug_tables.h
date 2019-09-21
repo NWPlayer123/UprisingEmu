@@ -2,6 +2,7 @@
 
 /* do not look in here, you've been warned */
 
+#include "debug_branch.h"
 #include "debug_integer.h"
 #include "debug_loadstore.h"
 #include "debug_system.h"
@@ -17,7 +18,7 @@ namespace debug {
 	static std::array<std::function<void(gekko::instruction&, std::unique_ptr<gekko::cpu>&)>, 64> primary = {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //opcode 0-7
 		nullptr, nullptr, cmpli,   nullptr, nullptr, nullptr, addi,    addis,   //opcode 8-15
-		nullptr, nullptr, nullptr, opcode19,nullptr, rlwinmx, nullptr, nullptr, //opcode 16-23
+		bcx,     nullptr, bx,      opcode19,nullptr, rlwinmx, nullptr, nullptr, //opcode 16-23
 		ori,     oris,    nullptr, nullptr, nullptr, nullptr, nullptr, opcode31,//opcode 24-31
 		lwz,     lwzu,    lbz,     lbzu,    stw,     stwu,    stb,     stbu,    //opcode 32-39
 		lhz,     lhzu,    lha,     lhau,    sth,     sthu,    lmw,     stmw,    //opcode 40-47
@@ -99,7 +100,7 @@ namespace debug {
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 0-7
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 8-15
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 16-23
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 24-31
+		nullptr, nullptr, nullptr, nullptr, andx,    nullptr, nullptr, nullptr, //ext 24-31
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 32-39
 		subfx,   nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 40-47
 		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, //ext 48-55

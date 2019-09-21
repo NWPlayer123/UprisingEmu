@@ -2,6 +2,7 @@
 
 namespace debug {
 	void debug(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) {
+		printf("%08X ", cpu->pc);
 		if (primary[inst.opcode] != nullptr)
 			primary[inst.opcode](inst, cpu);
 		else

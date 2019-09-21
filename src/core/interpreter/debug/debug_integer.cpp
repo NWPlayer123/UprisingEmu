@@ -123,7 +123,7 @@ namespace debug {
 
 	// Integer Logical Instructions
 	void andx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 28
-
+		instruction_reg3(inst.Rc ? "and." : "and", inst.rA, inst.rS, inst.rB);
 	}
 
 	void andcx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 60
@@ -172,7 +172,7 @@ namespace debug {
 
 	void ori(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 24
 		if (inst.rA == 0 && inst.rS == 0 && inst.UIMM == 0)
-			printf("nop\n"); //ori 0,0,0
+			;// printf("nop\n"); //ori 0,0,0
 		else
 			instruction3("ori", inst.rA, inst.rS, inst.UIMM);
 	}
