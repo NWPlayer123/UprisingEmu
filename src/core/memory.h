@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../io/file.h"
-#include "../types.h"
+#include "..//io//file.h"
+#include "..//types.h"
 #include "gekko.h"
 
 namespace memory {

@@ -23,6 +23,7 @@ extern u32 __builtin_bswap32(u32);
 extern u64 __builtin_bswap64(u64);
 
 #define BITSTRUCT(bit, len, name) struct { u32 : (32 - bit - len); u32 name : len; }
+//#define DEFINE(name, value) enum { name = value };
 
 //if bit 16 is 1, extend it (16 -> 32)
 static inline constexpr s32 EXTS(u32 x) { return (x >> 15 ? x | 0xFFFF0000 : x); }

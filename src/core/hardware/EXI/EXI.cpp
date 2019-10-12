@@ -1,6 +1,11 @@
-#include "ExternalInterface.h"
+#include "EXI.h"
 
 namespace EXI {
+	void EXI::write(u32 address, u32 value) { //TODO: memory& mem? for DMA r/w
+
+	}
+	/*
+	//TODO: split up?
 	std::string tobin(u32 value) {
 		std::string ret = "0b";
 		for (int i = 0; i < 32; i++)
@@ -8,7 +13,7 @@ namespace EXI {
 		return ret;
 	}
 
-	void EXI::write(u32 address, u32 value) {
+	void EXI_HW::write(u32 address, u32 value) {
 		switch (address & 0xFF) {
 			case 0x28:
 				this->cpr2.hex = value;
@@ -49,7 +54,7 @@ namespace EXI {
 		printf((value >> 1) & 1 ? "EXIINT cleared, " : "");
 		printf((value >> 0) & 1 ? "EXIINTMSK enabled, " : "");
 		printf("\n");
-		/*
+		*
 		if ((value >> 7) & 1)
 			printf("selected chip 0 device 2\n");
 		switch ((value >> 4) & 7) {
@@ -73,7 +78,7 @@ namespace EXI {
 		printf((value >> 2) & 1 ? "TC2 enabled\n" : "");
 
 		if ((value >> 1) & 1) printf("EXI2 Interrupt Cleared\n");
-		printf((value >> 0) & 1 ? "EXI2 enabled\n" : "");*/
+		printf((value >> 0) & 1 ? "EXI2 enabled\n" : "");*
 	}
 
 	void EXI2CR::info(u32 value) {
@@ -88,5 +93,5 @@ namespace EXI {
 				case 0b10: printf("r/w\n"); break;
 			}
 		}
-	}
+	}*/
 }

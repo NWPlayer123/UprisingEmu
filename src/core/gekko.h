@@ -1,6 +1,6 @@
 #pragma once
 #include "hardware/DSP.h"
-#include "hardware/ExternalInterface.h"
+#include "hardware/EXI/EXI.h"
 #include "hardware/MemoryInterface.h"
 #include "hardware/ProcessorInterface.h"
 #include "hardware/SerialInterface.h"

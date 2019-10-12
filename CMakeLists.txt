@@ -6,7 +6,10 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread -O2 -fdiagnostics-color=always"
 
 set(SOURCES
 		src/core/hardware/DSP.cpp
-		src/core/hardware/ExternalInterface.cpp
+		src/core/hardware/EXI/EXI.cpp
+		src/core/hardware/EXI/EXI_Channel.cpp
+		src/core/hardware/EXI/EXI_Device.cpp
+		src/core/hardware/EXI/EXI_DeviceAD16.cpp
 		src/core/hardware/MemoryInterface.cpp
 		src/core/hardware/ProcessorInterface.cpp
 		src/core/hardware/SerialInterface.cpp
@@ -34,7 +37,10 @@ set(SOURCES
 
 set(HEADERS
 		src/core/hardware/DSP.h
-		src/core/hardware/ExternalInterface.h
+		src/core/hardware/EXI/EXI.h
+		src/core/hardware/EXI/EXI_Channel.h
+		src/core/hardware/EXI/EXI_Device.h
+		src/core/hardware/EXI/EXI_DeviceAD16.h
 		src/core/hardware/MemoryInterface.h
 		src/core/hardware/ProcessorInterface.h
 		src/core/hardware/SerialInterface.h
