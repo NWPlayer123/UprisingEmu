@@ -1,13 +1,37 @@
-#include "interpreter_system.h"
+#include "debug_system.h"
 
-namespace interpreter {
+namespace PPCDebug {
+
+	std::map<int, std::string> whitelist = {
+		//instruction block address translation upper/lower
+		{528, "ibat0u"},
+		{529, "ibat0l"},
+		{530, "ibat1u"},
+		{531, "ibat1l"},
+		{532, "ibat2u"},
+		{533, "ibat2l"},
+		{534, "ibat3u"},
+		{535, "ibat3l"},
+		//data block address translation upper/lower
+		{536, "dbat0u"},
+		{537, "dbat0l"},
+		{538, "dbat1u"},
+		{539, "dbat1l"},
+		{540, "dbat2u"},
+		{541, "dbat2l"},
+		{542, "dbat3u"},
+		{543, "dbat3l"},
+		//Hardware Implementation-Dependent
+		{1008, "hid0"},
+	};
+
 	// Memory Synchronization Instructions
 	void eieio(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 854
 
 	}
 
-	void isync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 19
-
+	void isync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 19 ext 150
+		printf("isync\n");
 	}
 
 	void lwarx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 20
@@ -22,9 +46,9 @@ namespace interpreter {
 
 	}
 
+
 	void mcrxr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 512
-		cpu->CR.setreg(inst.crfD, cpu->xer.hex >> 28); //set crfD to top 4 bits of xer
-		cpu->xer.hex &= 0x0FFFFFFF; //clear xer
+
 	}
 
 	void mfcr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 19
@@ -32,21 +56,19 @@ namespace interpreter {
 	}
 
 	void mfmsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 83
-		rGPR[inst.rD] = cpu->msr.hex;
+		instruction1("mfmsr", inst.rD);
 	}
 
 	void mfspr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 339
-		switch (inst.spr()) {
-			default: rGPR[inst.rS] = cpu->spr[inst.spr()];
-		}
+		auto search = whitelist.find(inst.spr());
+		if (search != whitelist.end())
+			instruction_move2("mfspr", search->second.c_str(), inst.rS);
+		else
+			throw format("Unknown spr %d", inst.spr());
 	}
 
 	void mftb(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 371
-		switch (inst.spr()) {
-			case 268: rGPR[inst.rD] = (u32)(cpu->count); break;
-			case 269: rGPR[inst.rD] = (u32)(cpu->count >> 32); break;
-			default: throw format("invalid time base reg: %d", inst.spr());
-		}
+		instruction1(inst.spr() == 268 ? "mftb" : "mftbu", inst.rD);
 	}
 
 	void mtcrf(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 144
@@ -54,18 +76,19 @@ namespace interpreter {
 	}
 
 	void mtmsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 146
-		cpu->msr.hex = rGPR[inst.rS];
+		instruction1("mtmsr", inst.rS);
 	}
 
 	void mtspr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 467
-		switch (inst.spr()) {
-			default: cpu->spr[inst.spr()] = rGPR[inst.rS];
-		}
+		auto search = whitelist.find(inst.spr());
+		if (search != whitelist.end())
+			instruction_move("mtspr", search->second.c_str(), inst.rS);
+		else
+			throw format("Unknown spr %d", inst.spr());
 	}
 
 	//Segment Register Manipulation Instructions
 	void mfsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 595
-
 	}
 
 	void mfsrin(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 659
@@ -73,7 +96,7 @@ namespace interpreter {
 	}
 
 	void mtsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 210
-		cpu->sr[inst.SR] = rGPR[inst.rS];
+		instruction_move("mtsr", format("sr%d", inst.SR), inst.rS);
 	}
 
 	void mtsrin(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 242

@@ -6,7 +6,7 @@ int main() {
 	u64 size = f.size();
 	std::vector<gekko::instruction> code = memory::alloc_code(f);
 	try {
-		interpreter::run(code);
+		PPCInterpreter::run(code);
 	}
 	catch (std::string s) {
 		std::cout << s;

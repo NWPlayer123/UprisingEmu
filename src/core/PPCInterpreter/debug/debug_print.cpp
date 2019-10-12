@@ -1,6 +1,6 @@
 #include "debug_print.h"
 
-namespace debug {
+namespace PPCDebug {
 	char buffer[256];
 	void instruction_move(std::string name, std::string spr, u32 reg) {
 		sprintf(buffer, "%s, r%d", spr.c_str(), reg);

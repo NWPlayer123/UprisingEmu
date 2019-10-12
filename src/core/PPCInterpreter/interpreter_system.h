@@ -1,17 +1,17 @@
 #pragma once
 
-#include "..//..//..//types.h"
-#include "..//..//gekko.h"
-#include "debug_print.h"
+#include "..//..//types.h"
+#include "..//gekko.h"
 
-namespace debug {
+namespace PPCInterpreter {
+	#define	rGPR cpu->gpr
+
 	// Memory Synchronization Instructions
 	void eieio(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);      //opcode 31 ext 854
 	void isync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);      //opcode 19 ext 150
 	void lwarx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);      //opcode 31 ext 20
 	void stwcx_rc(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);   //opcode 31 ext 150
 	void sync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);       //opcode 31 ext 598
-
 
 	void mcrxr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 512
 	void mfcr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);     //opcode 31 ext 19
@@ -21,12 +21,6 @@ namespace debug {
 	void mtcrf(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 144
 	void mtmsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 146
 	void mtspr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 467
-
-	void eieio(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 854
-	void isync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 19
-	void lwarx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);    //opcode 31 ext 20
-	void stwcx_rc(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu); //opcode 31 ext 150
-	void sync(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);     //opcode 31 ext 598
 
 	void mfsr(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);     //opcode 31 ext 595
 	void mfsrin(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);   //opcode 31 ext 659

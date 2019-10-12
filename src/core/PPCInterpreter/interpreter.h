@@ -10,7 +10,7 @@
 
 typedef void (*HandleInput)(u32& value, void* address, bool isWrite);
 
-namespace interpreter {
+namespace PPCInterpreter {
 	void run(std::vector<gekko::instruction>& code);
 	#define rGPR cpu->gpr
 	//#define rSPR cpu.spr

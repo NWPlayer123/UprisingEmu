@@ -3,7 +3,7 @@
 #include "..//..//..//types.h"
 #include "..//..//gekko.h"
 
-namespace debug {
+namespace PPCDebug {
 #define rGPR cpu->gpr
 
 	// Branch Instructions

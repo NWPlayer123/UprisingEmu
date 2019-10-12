@@ -1,6 +1,6 @@
 #include "interpreter_loadstore.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	// Integer Load Instructions
 	void lbz(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 34
 		cpu->loadaddr(inst.rA ? rGPR[inst.rA] : 0, EXTS(inst.d));

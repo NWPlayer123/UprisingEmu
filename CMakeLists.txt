@@ -14,20 +14,20 @@ set(SOURCES
 		src/core/hardware/ProcessorInterface.cpp
 		src/core/hardware/SerialInterface.cpp
 
-		src/core/interpreter/debug/debug.cpp
-		src/core/interpreter/debug/debug_branch.cpp
-		src/core/interpreter/debug/debug_integer.cpp
-		src/core/interpreter/debug/debug_loadstore.cpp
-		src/core/interpreter/debug/debug_print.cpp
-		src/core/interpreter/debug/debug_system.cpp
-		src/core/interpreter/debug/debug_tables.cpp
+		src/core/PPCInterpreter/debug/debug.cpp
+		src/core/PPCInterpreter/debug/debug_branch.cpp
+		src/core/PPCInterpreter/debug/debug_integer.cpp
+		src/core/PPCInterpreter/debug/debug_loadstore.cpp
+		src/core/PPCInterpreter/debug/debug_print.cpp
+		src/core/PPCInterpreter/debug/debug_system.cpp
+		src/core/PPCInterpreter/debug/debug_tables.cpp
 
-		src/core/interpreter/interpreter.cpp
-		src/core/interpreter/interpreter_branch.cpp
-		src/core/interpreter/interpreter_integer.cpp
-		src/core/interpreter/interpreter_loadstore.cpp
-		src/core/interpreter/interpreter_system.cpp
-		src/core/interpreter/interpreter_tables.cpp
+		src/core/PPCInterpreter/interpreter.cpp
+		src/core/PPCInterpreter/interpreter_branch.cpp
+		src/core/PPCInterpreter/interpreter_integer.cpp
+		src/core/PPCInterpreter/interpreter_loadstore.cpp
+		src/core/PPCInterpreter/interpreter_system.cpp
+		src/core/PPCInterpreter/interpreter_tables.cpp
 
 		src/core/gekko.cpp
 		src/core/memory.cpp
@@ -45,20 +45,20 @@ set(HEADERS
 		src/core/hardware/ProcessorInterface.h
 		src/core/hardware/SerialInterface.h
 
-		src/core/interpreter/debug/debug.h
-		src/core/interpreter/debug/debug_branch.h
-		src/core/interpreter/debug/debug_integer.h
-		src/core/interpreter/debug/debug_loadstore.h
-		src/core/interpreter/debug/debug_print.h
-		src/core/interpreter/debug/debug_system.h
-		src/core/interpreter/debug/debug_tables.h
+		src/core/PPCInterpreter/debug/debug.h
+		src/core/PPCInterpreter/debug/debug_branch.h
+		src/core/PPCInterpreter/debug/debug_integer.h
+		src/core/PPCInterpreter/debug/debug_loadstore.h
+		src/core/PPCInterpreter/debug/debug_print.h
+		src/core/PPCInterpreter/debug/debug_system.h
+		src/core/PPCInterpreter/debug/debug_tables.h
 
-		src/core/interpreter/interpreter.h
-		src/core/interpreter/interpreter_branch.h
-		src/core/interpreter/interpreter_integer.h
-		src/core/interpreter/interpreter_loadstore.h
-		src/core/interpreter/interpreter_system.h
-		src/core/interpreter/interpreter_tables.h
+		src/core/PPCInterpreter/interpreter.h
+		src/core/PPCInterpreter/interpreter_branch.h
+		src/core/PPCInterpreter/interpreter_integer.h
+		src/core/PPCInterpreter/interpreter_loadstore.h
+		src/core/PPCInterpreter/interpreter_system.h
+		src/core/PPCInterpreter/interpreter_tables.h
 
 		src/core/gekko.h
 		src/core/memory.h

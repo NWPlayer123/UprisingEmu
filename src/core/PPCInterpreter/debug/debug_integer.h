@@ -1,11 +1,10 @@
 #pragma once
 
-#include "..//..//types.h"
-#include "..//gekko.h"
+#include "..//..//..//types.h"
+#include "..//..//gekko.h"
+#include "debug_print.h"
 
-namespace interpreter {
-	#define	rGPR cpu->gpr
-
+namespace PPCDebug {
 	// Integer Arithmetic Instructions
 	void addx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);       //opcode 31 ext 266
 	void addcx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);      //opcode 31 ext 10

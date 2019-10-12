@@ -9,7 +9,7 @@
 #include "..//..//..//types.h"
 #include "..//..//gekko.h"
 
-namespace debug {
+namespace PPCDebug {
 #define	rGPR cpu->gpr
 
 	void opcode19(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);

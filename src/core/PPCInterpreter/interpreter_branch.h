@@ -3,7 +3,7 @@
 #include "..//..//types.h"
 #include "..//gekko.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	#define rGPR cpu->gpr
 
 	// Branch Instructions

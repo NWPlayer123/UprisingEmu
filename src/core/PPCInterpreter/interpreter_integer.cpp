@@ -1,6 +1,6 @@
 #include "interpreter_integer.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	// Integer Arithmetic Instructions
 	void addx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 31 ext 266
 		rGPR[inst.rD] = rGPR[inst.rA] + rGPR[inst.rB]; //do operation

@@ -1,6 +1,6 @@
 #include "debug_branch.h"
 
-namespace debug {
+namespace PPCDebug {
 	// Branch Instructions
 	void bx(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 18
 		printf("%-12ssub_%08X\n", "b", inst.AA ? inst.BD << 2 : EXTS(inst.BD << 2) + cpu->oldpc);

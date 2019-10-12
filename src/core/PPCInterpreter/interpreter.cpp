@@ -1,6 +1,6 @@
 ﻿#include "interpreter.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	void dodebug(std::unique_ptr<gekko::cpu>& cpu) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 8; j++) {

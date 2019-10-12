@@ -1,6 +1,6 @@
 #include "interpreter_branch.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	u32 ctr_ok, cond_ok;
 
 	// Branch Instructions

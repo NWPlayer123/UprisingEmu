@@ -1,6 +1,6 @@
-#include "interpreter_tables.h"
+#include "debug_tables.h"
 
-namespace interpreter {
+namespace PPCDebug {
 	void opcode19(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) {
 		if (table19[inst.ext] != nullptr) {
 			table19[inst.ext](inst, cpu);
@@ -15,7 +15,7 @@ namespace interpreter {
 			table31[inst.ext](inst, cpu);
 		}
 		else {
-			throw format("unknown opcode %d ext %d\n", inst.opcode, inst.ext);
+			throw format("unknown debug opcode %d ext %d\n", inst.opcode, inst.ext);
 		}
 	}
 }

@@ -4,7 +4,7 @@
 #include "..//..//gekko.h"
 #include "debug_print.h"
 
-namespace debug {
+namespace PPCDebug {
 	// Integer Load Instructions
 	void lbz(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);        //opcode 34
 	void lbzu(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu);       //opcode 35

@@ -1,6 +1,6 @@
 #include "debug_loadstore.h"
 
-namespace debug {
+namespace PPCDebug {
 	// Integer Load Instructions
 	void lbz(gekko::instruction& inst, std::unique_ptr<gekko::cpu>& cpu) { //opcode 34
 		instruction_offset("lbz", inst.rD, inst.d, inst.rA);

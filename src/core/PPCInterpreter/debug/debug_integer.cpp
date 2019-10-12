@@ -1,6 +1,6 @@
 #include "debug_integer.h"
 
-namespace debug {
+namespace PPCDebug {
 	u32 temp;
 
 	// Integer Arithmetic Instructions

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "core/interpreter/interpreter.h"
+#include "core/PPCInterpreter/interpreter.h"
 #include "core/memory.h"
 #include "core/gekko.h"
 #include "io/file.h"

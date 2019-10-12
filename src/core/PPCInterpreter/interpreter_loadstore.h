@@ -3,7 +3,7 @@
 #include "..//..//types.h"
 #include "..//gekko.h"
 
-namespace interpreter {
+namespace PPCInterpreter {
 	#define	rGPR cpu->gpr
 
 	/* Plan is, our memory pages will be either 0 (nullptr), 1 (hardware register), or

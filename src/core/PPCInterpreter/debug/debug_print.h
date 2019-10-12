@@ -2,7 +2,7 @@
 
 #include "..//..//..//types.h"
 
-namespace debug {
+namespace PPCDebug {
 	void instruction_move(std::string name, std::string spr, u32 reg);
 	void instruction_move2(std::string name, std::string spr, u32 reg);
 	void instruction_offset(std::string name, u32 reg1, u32 val, u32 reg2);
