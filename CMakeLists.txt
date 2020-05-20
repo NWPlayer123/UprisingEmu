@@ -5,6 +5,8 @@ set (CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-pthread -O2 -fdiagnostics-color=always")
 
 set(SOURCES
+		src/core/ARMInterpreter/interpreter.cpp
+
 		src/core/hardware/DSP.cpp
 		src/core/hardware/EXI/EXI.cpp
 		src/core/hardware/EXI/EXI_Channel.cpp
@@ -31,11 +33,14 @@ set(SOURCES
 
 		src/core/gekko.cpp
 		src/core/memory.cpp
+		src/core/Starlet.cpp
 		src/io/file.cpp
 		src/main.cpp
 		)
 
 set(HEADERS
+		src/core/ARMInterpreter/interpreter.h
+
 		src/core/hardware/DSP.h
 		src/core/hardware/EXI/EXI.h
 		src/core/hardware/EXI/EXI_Channel.h
@@ -62,6 +67,7 @@ set(HEADERS
 
 		src/core/gekko.h
 		src/core/memory.h
+		src/core/Starlet.h
 		src/io/file.h
 		src/types.h
 		src/main.h

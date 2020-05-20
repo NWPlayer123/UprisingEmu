@@ -13,7 +13,6 @@ namespace munna {
 			this->parse = std::make_unique<parse_swap>();
 		else
 			this->parse = std::make_unique<parse_norm>();
-
     }
 
 	/************* File Position Handling *************/
